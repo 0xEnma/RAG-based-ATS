@@ -1,0 +1,482 @@
+/* --- Basic Setup --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #000;
+    color: #e0e0e0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* --- Starfield Canvas --- */
+#starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-color: #000;
+}
+
+/* --- Sidebar --- */
+#sidebar {
+    width: 280px;
+    height: 100vh;
+    background-color: #0d0d0d;
+    border-right: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 10;
+    transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+    transform: translateX(0);
+}
+
+#sidebar.collapsed {
+    transform: translateX(-100%);
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #222;
+}
+
+#new-chat-btn {
+    background-color: #222;
+    color: #ccc;
+    border: 1px solid #444;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+#new-chat-btn:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.3em;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.toggle-btn:hover {
+    color: #fff;
+}
+
+.sidebar-search {
+    padding: 15px;
+    border-bottom: 1px solid #222;
+}
+#search-chats-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #1a1a1a;
+    color: #fff;
+    font-size: 0.95em;
+    transition: border-color 0.2s ease;
+}
+#search-chats-input:focus {
+    outline: none;
+    border-color: #555;
+}
+
+#chat-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+     /* Styling scrollbar for sidebar chat list (optional) */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #444 #1a1a1a; /* Firefox */
+}
+#chat-list::-webkit-scrollbar { /* Chrome/Safari */
+    width: 6px;
+}
+#chat-list::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+#chat-list::-webkit-scrollbar-thumb {
+    background-color: #444;
+    border-radius: 3px;
+}
+
+
+.chat-list-item {
+    padding: 10px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9em;
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.chat-list-item:hover {
+    background-color: #2a2a2a;
+}
+.chat-list-item.active {
+    border-color: #444;
+    background-color: #2a2a2a;
+    color: #fff;
+}
+.chat-list-item.hidden {
+    display: none;
+}
+
+
+/* --- Main Content Area --- */
+#main-content {
+    flex-grow: 1;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    margin-left: 280px;
+    transition: margin-left 0.3s ease-in-out;
+    position: relative;
+    z-index: 2;
+}
+
+#main-content.sidebar-collapsed {
+    margin-left: 0;
+    padding-left: 50px;
+}
+
+#open-sidebar-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 15;
+    display: none;
+}
+#main-content.sidebar-collapsed #open-sidebar-btn {
+    display: block;
+}
+
+/* --- Floating Chat Elements --- */
+#chat-header {
+    width: 100%;
+    max-width: 800px;
+    padding: 15px 20px; /* Reduced padding */
+    text-align: center;
+    background-color: rgba(13, 13, 13, 0.7);
+    border: 1px solid rgba(51, 51, 51, 0.5); /* Fainter border */
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    margin-bottom: 20px;
+    pointer-events: auto;
+}
+#chat-header h2 {
+    color: #fff;
+    margin-bottom: 3px;
+    font-size: 1.3em;
+}
+#chat-header span {
+    font-size: 0.8em;
+    color: #999;
+}
+
+#chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    width: 100%;
+    max-width: 800px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    pointer-events: none;
+
+    /* --- HIDE SCROLLBAR --- */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+}
+#chat-messages::-webkit-scrollbar { /* Chrome, Safari, Opera */
+    display: none;
+}
+/* ------------------------ */
+
+#chat-messages > * {
+    pointer-events: auto;
+}
+
+/* --- MODIFIED: Glassy Chat Bubbles --- */
+@keyframes float {
+    0% { transform: translateY(0px) rotate(-0.5deg); } /* Added slight rotation */
+    50% { transform: translateY(-6px) rotate(0.5deg); }
+    100% { transform: translateY(0px) rotate(-0.5deg); }
+}
+
+.message {
+    padding: 12px 18px;
+    border-radius: 18px;
+    max-width: 80%; /* Slightly narrower */
+    word-wrap: break-word;
+    line-height: 1.5;
+    animation: float 5s ease-in-out infinite; /* Slower, smoother float */
+    
+    /* Glass Effect */
+    background-color: rgba(255, 255, 255, 0.08); /* Very faint white background */
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Faint white border */
+    backdrop-filter: blur(10px); /* Stronger blur for glass */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth hover */
+    color: #e0e0e0; /* Ensure text is readable */
+}
+
+/* Add slight delay variation to make floating less uniform */
+.message:nth-child(odd) {
+    animation-delay: -1s;
+}
+.message:nth-child(3n) {
+     animation-delay: -2s;
+}
+
+
+.message:hover {
+    transform: translateY(-3px) rotate(0deg); /* Lift slightly on hover, remove rotation */
+    background-color: rgba(255, 255, 255, 0.15); /* Slightly brighter on hover */
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.user-message {
+    /* Keep specific alignment and corner radius */
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+    /* Optional: slightly different tint for user */
+    /* background-color: rgba(200, 200, 255, 0.08); */
+    /* border: 1px solid rgba(200, 200, 255, 0.15); */
+}
+.user-message:hover {
+    /* background-color: rgba(200, 200, 255, 0.15); */
+}
+
+.bot-message {
+    /* Keep specific alignment and corner radius */
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+/* ------------------------------------- */
+
+.bot-message.loading p {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #aaa;
+}
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #555;
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    to {transform: rotate(360deg);}
+}
+
+.source-links {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1); /* Fainter divider */
+}
+.source-links p {
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #bbb; /* Slightly lighter source text */
+}
+.source-links a {
+    display: inline-block;
+    padding: 4px 8px;
+    /* Glassy links */
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    color: #ddd;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    font-size: 0.8em;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.source-links a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+/* Chat Input Form */
+#chat-form {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    padding: 15px; /* Reduced padding */
+    border-top: 1px solid rgba(51, 51, 51, 0.5); /* Fainter border */
+    background-color: rgba(13, 13, 13, 0.7);
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+    margin-top: 20px;
+    pointer-events: auto;
+}
+
+#message-input {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #1a1a1a;
+    color: #fff;
+    font-size: 1em;
+    transition: border-color 0.2s ease;
+}
+#message-input:focus {
+    outline: none;
+    border-color: #555;
+}
+
+#chat-form button {
+    padding: 12px 20px;
+    margin-left: 10px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    background-color: #222;
+    color: #ccc;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+#chat-form button:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+/* --- Responsive adjustments --- */
+@media (max-width: 768px) {
+    #sidebar {
+        transform: translateX(-100%);
+        width: 80%;
+    }
+    #sidebar.collapsed {
+       transform: translateX(-100%);
+    }
+     #main-content {
+        margin-left: 0;
+        padding: 10px; /* Further reduce padding */
+    }
+    #main-content.sidebar-collapsed #open-sidebar-btn {
+        display: block;
+    }
+    #chat-header, #chat-messages, #chat-form {
+        width: 100%;
+        max-width: unset;
+    }
+    .message {
+        max-width: 95%;
+        padding: 10px 15px;
+    }
+    #open-sidebar-btn {
+        left: 10px;
+        top: 10px;
+    }
+     #chat-header { padding: 10px; }
+     #chat-form { padding: 10px; }
+     #message-input { padding: 10px 12px; }
+     #chat-form button { padding: 10px 15px; }
+}
+/* --- Additions to static/style.css --- */
+
+/* Style for the chat list item container */
+.chat-list-item-container {
+    position: relative; /* Needed for absolute positioning of the delete button */
+    display: flex; /* Use flex to align text and button */
+    align-items: center;
+}
+
+/* Adjust chat list item text to make space for the button */
+.chat-list-item {
+    flex-grow: 1; /* Allow text to take available space */
+    /* Keep existing styles: padding, background, border-radius, cursor, etc. */
+    padding: 10px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9em;
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    /* Add padding-right to prevent text overlapping the button */
+    padding-right: 30px; /* Adjust as needed */
+}
+.chat-list-item:hover {
+    background-color: #2a2a2a;
+}
+.chat-list-item.active {
+    border-color: #444;
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+/* Style for the delete button */
+.delete-chat-btn {
+    position: absolute; /* Position relative to the container */
+    right: 8px; /* Position on the right side */
+    top: 50%;
+    transform: translateY(-50%); /* Center vertically */
+    background: none;
+    border: none;
+    color: #666; /* Dim color */
+    font-size: 0.9em;
+    cursor: pointer;
+    padding: 5px; /* Make it easier to click */
+    display: none; /* Hidden by default */
+    transition: color 0.2s ease;
+}
+
+/* Show delete button on hover of the container */
+.chat-list-item-container:hover .delete-chat-btn {
+    display: block;
+}
+
+.delete-chat-btn:hover {
+    color: #f56565; /* Red color on hover */
+}
+/* ---------------------------------- */
