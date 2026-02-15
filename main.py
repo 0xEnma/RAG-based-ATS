@@ -23,13 +23,12 @@ async def lifespan(app: FastAPI):
     # 1. Get API Keys from environment variables
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     MONGO_URI = os.getenv("MONGO_URI")
-    os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
-    
+        
     if not GOOGLE_API_KEY or not MONGO_URI:
         raise RuntimeError("API keys (GOOGLE_API_KEY, MONGO_URI) not found in env file (🔑)!")
 
     # 2. Connect to MongoDB
-    app_state["mongo_client"] = pymongo.MongoClient(MONGO_URI)
+    app_state["mongo_client"] = pymongo.MongoClient(MONGO_URI) #setting up the client object instance
     db = app_state["mongo_client"]['ats_db']
     chunk_collection = db['resume_chunks']
     pdf_collection = db['resumes']
@@ -45,7 +44,7 @@ async def lifespan(app: FastAPI):
     vector_store = MongoDBAtlasVectorSearch(
         collection=chunk_collection,
         embedding=embedding_model,
-        index_name="vector_index"
+        index_name="vector_index" 
     )
     app_state["retriever"] = vector_store.as_retriever(
         search_type='similarity', 
@@ -100,8 +99,9 @@ class QueryResponse(BaseModel):
 async def handle_query(request: QueryRequest):
     question = request.question
     try:
-        docs = await app_state["retriever"].ainvoke(question)
+        docs = await app_state["retriever"].ainvoke(question) # await is used because I am calling an async method
         source_files = list(set(doc.metadata.get("source") for doc in docs if doc.metadata.get("source")))
+        #If 5 of the 10 chunks came from the same file, set() removes the duplicates so the recruiter only sees the filename once.
         answer = await app_state["main_chain"].ainvoke(question) 
         
         return QueryResponse(
