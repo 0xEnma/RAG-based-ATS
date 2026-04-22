@@ -20,12 +20,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const logoutBtn = document.getElementById('logout-btn');
 
     // --- Profile Corner ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlUsername = urlParams.get('username');
+    if (urlUsername) {
+        localStorage.setItem("username", urlUsername);
+        // Optional: Clean the URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     const username = localStorage.getItem("username");
     if (username) {
+        profileCorner.style.display = 'flex'; // Ensure it's visible
         usernameDropdown.textContent = username;
         pfp.textContent = username.charAt(0).toUpperCase();
     } else {
         profileCorner.style.display = 'none';
+        // If no user is logged in, you might want to force redirect to login
+        // window.location.href = 'http://localhost:8080/login';
     }
 
     pfp.addEventListener('click', (event) => {
@@ -35,7 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     logoutBtn.addEventListener('click', () => {
         localStorage.removeItem('username');
-        window.location.href = '/';
+        // We go to the Java logout to clear the session, 
+        // which then redirects back to http://localhost:8000/
+        window.location.href = 'http://localhost:8080/logout';
     });
 
     window.addEventListener('click', () => {

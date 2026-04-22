@@ -13,6 +13,8 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
+
 load_dotenv()
 app_state = {}
 
@@ -84,6 +86,15 @@ async def lifespan(app: FastAPI):
 
 # Create the FastAPI app
 app = FastAPI(lifespan=lifespan)
+
+# Add CORS middleware to allow Java Auth Service
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8080"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Define request/response models
 class QueryRequest(BaseModel):

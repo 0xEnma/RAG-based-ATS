@@ -29,7 +29,7 @@ collection = db['resumes'] # This script populates the 'resumes' collection
 
 # --- 3. Define the folder where your resumes are stored ---
 
-resumes_folder_path = './resume_pdfs/' # idhar ayega path 
+resumes_folder_path = r'C:\Users\harsh\Desktop\New folder\Project\RAG Resume ATS\RAG-based-ATS\RAG-based-ATS data\data\data\INFORMATION-TECHNOLOGY' 
 if not os.path.exists(resumes_folder_path):
     print(f"❌ Error: The path '{resumes_folder_path}' does not exist.")
     print("Please create the folder or update the 'resumes_folder_path' variable in this script.")
@@ -86,7 +86,7 @@ import io
 import pdfplumber
 import os
 from dotenv import load_dotenv
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 
 # --- 1. Load Environment Variables ---

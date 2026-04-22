@@ -9,6 +9,11 @@ env/
 
 # Secrets file - VERY IMPORTANT
 .env
+.env.local
+java-auth-service/.env
+
+# Build artifacts
+java-auth-service/target/
 
 # IDE specific files (VS Code)
 .vscode/
